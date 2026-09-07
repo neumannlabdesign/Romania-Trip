@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>טיול משפחתי לרומניה - ספטמבר 2026</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Leaflet CSS for Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        :root {
+            --primary: #2C3E50;
+            --accent: #E67E22;
+            --bg: #F8F9FA;
+            --card-bg: #FFFFFF;
+            --text: #2C3E50;
+            --text-light: #7F8C8D;
+            --border: #E2E8F0;
+            --shadow: 0 4px 15px rgba(0,0,0,0.05);
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Rubik', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            padding-bottom: 70px;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 24px 16px;
+            text-align: center;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        header h1 {
+            font-size: 1.6rem;
+            margin-bottom: 6px;
+        }
+
+        header p {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        /* Navigation Tabs */
+        .tabs {
+            display: flex;
+            background: white;
+            border-radius: var(--radius);
+            padding: 4px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 10px;
+            z-index: 100;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px 4px;
+            border: none;
+            background: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-light);
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .tab-btn.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        /* Day Selector Pill Carousel */
+        .day-selector {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            margin-bottom: 16px;
+            scrollbar-width: none;
+        }
+
+        .day-selector::-webkit-scrollbar {
+            display: none;
+        }
+
+        .day-pill {
+            background: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            white-space: nowrap;
+            font-weight: 500;
+            font-size: 0.85rem;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            color: var(--text-light);
+        }
+
+        .day-pill.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Content Sections */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Day Cards & Timeline */
+        .day-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .day-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--bg);
+            padding-bottom: 10px;
+            margin-bottom: 14px;
+        }
+
+        .day-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .day-base {
+            font-size: 0.8rem;
+            background: #EBF5FB;
+            color: #2980B9;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        /* Timeline Items */
+        .timeline {
+            position: relative;
+            padding-right: 20px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            right: 6px;
+            top: 5px;
+            bottom: 5px;
+            width: 2px;
+            background: var(--border);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .timeline-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .timeline-icon {
+            position: absolute;
+            right: -20px;
+            top: 2px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 2px solid white;
+            box-shadow: 0 0 0 2px var(--accent);
+        }
+
+        .timeline-time {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 2px;
+        }
+
+        .timeline-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .timeline-desc {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            line-height: 1.4;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .btn-nav {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 6px;
+            text-decoration: none;
+            color: white;
+            background-color: #3498DB;
+        }
+
+        .btn-waze {
+            background-color: #33CCFF;
+            color: #111;
+            font-weight: 500;
+        }
+
+        /* Map styling */
+        #map {
+            height: 450px;
+            width: 100%;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        /* Budget Table */
+        .budget-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .budget-table th, .budget-table td {
+            padding: 12px;
+            text-align: right;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        .budget-table th {
+            background: var(--primary);
+            color: white;
+            font-weight: 500;
+        }
+
+        .budget-total {
+            font-weight: 700;
+            background: #FEF9E7;
+            color: #D35400;
+        }
+
+        /* Tips Card */
+        .tip-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 14px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow);
+            border-right: 4px solid var(--accent);
+        }
+
+        .tip-card h3 {
+            font-size: 1rem;
+            margin-bottom: 6px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tip-card p, .tip-card ul {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            line-height: 1.5;
+            padding-right: 18px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1><i class="fa-solid fa-mountain-sun"></i> טיול משפחתי לרומניה</h1>
+        <p>זוג + 2 בנות | 15–25 בספטמבר</p>
+    </header>
+
+    <div class="container">
+        <!-- Tab Controls -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('itinerary')"><i class="fa-solid fa-calendar-days"></i> מסלול</button>
+            <button class="tab-btn" onclick="switchTab('map-view')"><i class="fa-solid fa-map-location-dot"></i> מפה</button>
+            <button class="tab-btn" onclick="switchTab('budget')"><i class="fa-solid fa-coins"></i> תקציב</button>
+            <button class="tab-btn" onclick="switchTab('tips')"><i class="fa-solid fa-lightbulb"></i> טיפים</button>
+        </div>
+
+        <!-- TAB 1: ITINERARY -->
+        <div id="itinerary" class="tab-content active">
+            <!-- Day Pill Filters -->
+            <div class="day-selector">
+                <div class="day-pill active" onclick="filterDay('all')">הכל</div>
+                <div class="day-pill" onclick="filterDay('day1')">יום 1</div>
+                <div class="day-pill" onclick="filterDay('day2')">יום 2</div>
+                <div class="day-pill" onclick="filterDay('day3')">יום 3</div>
+                <div class="day-pill" onclick="filterDay('day4')">יום 4</div>
+                <div class="day-pill" onclick="filterDay('day5')">יום 5</div>
+                <div class="day-pill" onclick="filterDay('day6')">יום 6</div>
+                <div class="day-pill" onclick="filterDay('day7')">יום 7</div>
+                <div class="day-pill" onclick="filterDay('day8')">יום 8</div>
+                <div class="day-pill" onclick="filterDay('day9')">יום 9</div>
+                <div class="day-pill" onclick="filterDay('day10')">יום 10</div>
+                <div class="day-pill" onclick="filterDay('day11')">יום 11</div>
+            </div>
+
+            <!-- DAY 1 -->
+            <div class="day-card" data-day="day1">
+                <div class="day-card-header">
+                    <div class="day-title">יום 1 | 15/09: הגעה ובראשוב</div>
+                    <div class="day-base"><i class="fa-solid fa-bed"></i> בראשוב</div>
+                </div>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-icon"></div>
+                        <div class="timeline-time">13:00</div>
+                        <div class="timeline-title">נחיתה בבוקרשט ואיסוף רכב</div>
+                        <div class="timeline-desc">יציאה צפונה על כביש DN1 לכיוון בראשוב.</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon"></div>
+                        <div class="timeline-time">15:00</div>
+                        <div class="timeline-title">ארוחת צהריים - La Mama Sinaia</div>
+                        <div class="timeline-desc">אוכל רומני עממי בדרך.</div>
+                        <div class="nav-buttons">
+                            <a href="https://maps.google.com/?q=La+Mama+Sinaia" target="_blank" class="btn-nav"><i class="fa-solid fa-location-arrow"></i> Google Maps</a>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon"></div>
+                        <div class="timeline-time">17:30</div>
+                        <div class="timeline-title">צ'ק אין בבראשוב</div>
+                        <div class="timeline-desc">Brasov Holiday Apartments (Str. Egretei 3).</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon"></div>
+                        <div class="timeline-time">18:30</div>
+                        <div class="timeline-title">כיכר המועצה בבראשוב</div>
+                        <div class="timeline-desc">חנייה בחניון Livada Poștei וסיבוב בכיכר Piața Sfatului.</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon"></div>
+                        <div class="timeline-time">19:30</div>
+                        <div class="timeline-title">ארוחת ערב - Sergiana</div>
+                        <div class="timeline-desc">מסעדה מסורתית מומלצת במרתף אבן.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DAY 2 -->
+            <div class="day-card" data-day="day2">
+                <div class="day-card-header">
+                    <div class="day-title">יום 2 | 16/09: דינוזאורים וטירת בראן</div>
+                    <div class="day-base"><i class="fa-solid fa-bed"></i> בראשוב</div>
+                </div>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-icon"></div>
+                        <div class="timeline-time">09:30</div>
+                        <div class="timeline-title">Dino Parc Râșnov</div>
+                        <div class="timeline-desc">פארק דינוזאורים חווייתי ביער. חנייה: Parcare Cetatea Râșnov.</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon"></div>
+                        <div class="timeline-time">12:30</div>
+                        <div class="timeline-title">ארוחת צהריים - Taverna Bran</div>
+                        <div class="timeline-desc">מסעדה עממית ליד הטירה.</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon"></div>
+                        <div class="timeline-time">14:00</div>
+                        <div class="timeline-title">טירת בראן (Bran Castle)</div>
+                        <div class="timeline-desc">"הטירה של דרקולה". חנייה: Parcare Castel Bran.</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon"></div>
+                        <div class="timeline-time">16:30</div>
+                        <div class="timeline-title">סיור רגלי בבראשוב</div>
+                        <div class="timeline-desc">הכנסייה השחורה, רחוב החבלים הצר (Strada Sforii) ומדרחוב הרפובליקה.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DAY 3 -->
+            <div class="day-card" data-day="day3">
+                <div class="day-card-header">
+                    <div class="day-title">יום 3 | 17/09: ארמון פלש ומגלשות בושטני</div>
+                    <div class="day-base"><i class="fa-solid fa-bed"></i> בראשוב</div>
+                </div>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-icon"></div>
+                        <div class="timeline-time">09:00</div>
+                        <div class="timeline-title">ארמון פלש (Peleș Castle)</div>
+                        <div class="timeline-desc">ארמון ציורי בסינאיה. חנייה: Parcare Castelul Peleș.</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon"></div>
+                        <div class="timeline-time">13:30</div>
+                        <div class="timeline-title">מגלשות הרים - Alpine Coaster Bușteni</div>
+                        <div class="timeline-desc">אטרקציה מלהיבה לבנות בלב היער.</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon"></div>
+                        <div class="timeline-time">15:30</div>
+                        <div class="timeline-title">פארק דימיטרי גיקה</div>
+                        <div class="timeline-desc">פארק ירוק בסינאיה וגלידה לבנות.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DAY 4 -->
+            <div class="day-card" data-day="day4">
+                <div class="day-card-header">
+                    <div class="day-title">יום 4 | 18/09: אגם סנט אנה</div>
+                    <div class="day-base"><i class="fa-solid fa-bed"></i> בראשוב</div>
+                </div>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-icon"></div>
+                        <div class="timeline-time">09:30</div>
+                        <div class="timeline-title">אגם סנט אנה (Lacul Sfânta Ana)</div>
+                        <div class="timeline-desc">מסלול הליכה קליל סביב אגם געשי ושייט בסירות פדלים.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DAY 5 -->
+            <div class="day-card" data-day="day5">
+                <div class="day-card-header">
+                    <div class="day-title">יום 5 | 19/09: פארק אקסטרים ורכבל</div>
+                    <div class="day-base"><i class="fa-solid fa-bed"></i> בראשוב</div>
+                </div>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-icon"></div>
+                        <div class="timeline-time">10:00</div>
+                        <div class="timeline-title">Parc Aventura Brașov</div>
+                        <div class="timeline-desc">פארק חבלים ואתגרים בטבע. חנייה: Parcare Lacul Noua.</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon"></div>
+                        <div class="timeline-time">16:00</div>
+                        <div class="timeline-title">רכבל להר טמפה (Tâmpa)</div>
+                        <div class="timeline-desc">תצפית מרהיבה על בראשוב בשקיעה.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DAY 6 -->
+            <div class="day-card" data-day="day6">
+                <div class="day-card-header">
+                    <div class="day-title">יום 6 | 20/09: הכפר ויסקרי ומצודת רופאה</div>
+                    <div class="day-base"><i class="fa-solid fa-bed"></i> בראשוב</div>
+                </div>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-icon"></div>
+                        <div class="timeline-time">09:30</div>
+                        <div class="timeline-title">הכפר הציורי ויסקרי (Viscri)</div>
+                        <div class="timeline-desc">סיור בכפר עתיק ובכנסייה המבוצרת.</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon"></div>
+                        <div class="timeline-time">15:00</div>
+                        <div class="timeline-title">מצודת רופאה (Rupea Fortress)</div>
+                        <div class="timeline-desc">מצודה עתיקה ומפוארת על ראש הגבעה.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DAY 7 -->
+            <div class="day-card" data-day="day7">
+                <div class="day-card-header">
+                    <div class="day-title">יום 7 | 21/09: כביש הטרנספגראשן</div>
+                    <div class="day-base"><i class="fa-solid fa-bed"></i> סגישוארה</div>
+                </div>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-icon"></div>
+                        <div class="timeline-time">07:30</div>
+                        <div class="timeline-title">כביש הטרנספגראשן (Transfăgărășan)</div>
+                        <div class="timeline-desc">נסיעה מרהיבה בהרים ועצירה באגם באליאה (Bâlea Lac).</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon"></div>
+                        <div class="timeline-time">15:30</div>
+                        <div class="timeline-title">צ'ק אין בסגישוארה</div>
+                        <div class="timeline-desc">Ungefug A-Frame Sighisoara.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DAY 8 -->
+            <div class="day-card" data-day="day8">
+                <div class="day-card-header">
+                    <div class="day-title">יום 8 | 22/09: סגישוארה המדיאבלית</div>
+                    <div class="day-base"><i class="fa-solid fa-bed"></i> סגישוארה</div>
+                </div>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-icon"></div>
+                        <div class="timeline-time">10:00</div>
+                        <div class="timeline-title">מצודת סגישוארה ומגדל השעון</div>
+                        <div class="timeline-desc">סיור בסמטאות הצבעוניות, מדרגות המורים המקורות (Scara Acoperită).</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DAY 9 -->
+            <div class="day-card" data-day="day9">
+                <div class="day-card-header">
+                    <div class="day-title">יום 9 | 23/09: מעבר לסביו (Sibiu)</div>
+                    <div class="day-base"><i class="fa-solid fa-bed"></i> סביו</div>
+                </div>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-icon"></div>
+                        <div class="timeline-time">10:30</div>
+                        <div class="timeline-title">המרכז העתיק של סביו</div>
+                        <div class="timeline-desc">הכיכר הגדולה (Piața Mare), גשר השקרים והבתים עם "העיניים".</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon"></div>
+                        <div class="timeline-time">15:00</div>
+                        <div class="timeline-title">מוזיאון הכפר הפתוח ASTRA</div>
+                        <div class="timeline-desc">פארק ענק בטבע עם בתי עץ עתיקים.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DAY 10 -->
+            <div class="day-card" data-day="day10">
+                <div class="day-card-header">
+                    <div class="day-title">יום 10 | 24/09: טירת קורבין ומכרה המלח</div>
+                    <div class="day-base"><i class="fa-solid fa-bed"></i> סביו</div>
+                </div>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-icon"></div>
+                        <div class="timeline-time">09:30</div>
+                        <div class="timeline-title">טירת קורבין (Corvin Castle)</div>
+                        <div class="timeline-desc">טירה גותית מרהיבה עם גשר עץ מרשים.</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon"></div>
+                        <div class="timeline-time">13:30</div>
+                        <div class="timeline-title">מכרה המלח בטורדה (Salina Turda)</div>
+                        <div class="timeline-desc">פארק שעשועים תת-קרקעי ענק עם שייט באגם וגלגל ענק.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DAY 11 -->
+            <div class="day-card" data-day="day11">
+                <div class="day-card-header">
+                    <div class="day-title">יום 11 | 25/09: חזרה לבוקרשט וטיסה</div>
+                    <div class="day-base"><i class="fa-solid fa-plane"></i> טיסה</div>
+                </div>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-icon"></div>
+                        <div class="timeline-time">07:00</div>
+                        <div class="timeline-title">נסיעה מסביו לבוקרשט</div>
+                        <div class="timeline-desc">החזרת הרכב בשדה התעופה בשעה 12:00.</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- TAB 2: MAP -->
+        <div id="map-view" class="tab-content">
+            <div id="map"></div>
+        </div>
+
+        <!-- TAB 3: BUDGET -->
+        <div id="budget" class="tab-content">
+            <table class="budget-table">
+                <thead>
+                    <tr>
+                        <th>סעיף תקציב</th>
+                        <th>עלות (RON)</th>
+                        <th>עלות (ש"ח)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>אטרקציות וכניסות לאתרים</td>
+                        <td>1,940 RON</td>
+                        <td>~1,590 ₪</td>
+                    </tr>
+                    <tr>
+                        <td>דלק ונסיעות</td>
+                        <td>600–750 RON</td>
+                        <td>~500–610 ₪</td>
+                    </tr>
+                    <tr>
+                        <td>מסעדות (צהריים וערב)</td>
+                        <td>4,400–6,000 RON</td>
+                        <td>~3,600–4,900 ₪</td>
+                    </tr>
+                    <tr>
+                        <td>סופרמרקט ונשנושים</td>
+                        <td>1,300–1,600 RON</td>
+                        <td>~1,060–1,300 ₪</td>
+                    </tr>
+                    <tr class="budget-total">
+                        <td>סה"כ משוער (ללא מלונות/רכב)</td>
+                        <td>8,240–10,290 RON</td>
+                        <td>~6,750–8,400 ₪</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- TAB 4: TIPS -->
+        <div id="tips" class="tab-content">
+            <div class="tip-card">
+                <h3><i class="fa-solid fa-square-parking"></i> אפליקציית חנייה - TPARK</h3>
+                <p>הורידו מראש את אפליקציית <strong>TPARK</strong> לתשלום נוח על חנייה עירונית בבראשוב, סביו וסינאיה באשראי.</p>
+            </div>
+            <div class="tip-card">
+                <h3><i class="fa-solid fa-money-bill-wave"></i> מזומן וטיפים</h3>
+                <p>החזיקו תמיד כ-300–500 ליי במזומן. טיפים במסעדות (10%) ניתנים במזומן בלבד גם אם משלמים באשראי.</p>
+            </div>
+            <div class="tip-card">
+                <h3><i class="fa-solid fa-shield-cat"></i> דובים ובטיחות</h3>
+                <p>באזור בראשוב וסינאיה יש דובים. אם מקבלים התרעת חירום לטלפון (Ro-Alert), לא להילחץ. לעולם לא להתקרב או להאכיל דובים!</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Leaflet JS for Map -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Tab Switcher
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+
+            if(tabId === 'map-view') {
+                setTimeout(initMap, 200); // Fix map rendering inside tab
+            }
+        }
+
+        // Day Filter
+        function filterDay(day) {
+            document.querySelectorAll('.day-pill').forEach(el => el.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            const cards = document.querySelectorAll('.day-card');
+            cards.forEach(card => {
+                if(day === 'all' || card.getAttribute('data-day') === day) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Leaflet Map Initialization
+        let mapInitialized = false;
+        function initMap() {
+            if (mapInitialized) return;
+            mapInitialized = true;
+
+            const map = L.map('map').setView([45.6579, 25.6012], 8); // Centered on Brasov
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap'
+            }).addTo(map);
+
+            // Key Locations
+            const locations = [
+                { name: "בראשוב (Brasov)", lat: 45.6579, lng: 25.6012 },
+                { name: "טירת בראן (Bran Castle)", lat: 45.5149, lng: 25.3672 },
+                { name: "ארמון פלש (Peles Castle)", lat: 45.3599, lng: 25.5426 },
+                { name: "מגלשות בושטני (Busteni)", lat: 45.4152, lng: 25.5385 },
+                { name: "סגישוארה (Sighisoara)", lat: 46.2197, lng: 24.7961 },
+                { name: "סביו (Sibiu)", lat: 45.7983, lng: 24.1257 },
+                { name: "מכרה המלח טורדה (Salina Turda)", lat: 46.5877, lng: 23.7873 },
+                { name: "טירת קורבין (Corvin Castle)", lat: 45.7494, lng: 22.8883 },
+                { name: "אגם באליאה (Balea Lac)", lat: 45.6042, lng: 24.6169 }
+            ];
+
+            locations.forEach(loc => {
+                L.marker([loc.lat, loc.lng]).addTo(map)
+                    .bindPopup(`<b>${loc.name}</b>`);
+            });
+        }
+    </script>
+</body>
+</html>
